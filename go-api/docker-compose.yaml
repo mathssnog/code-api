@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  #the Go application 
+  go-app:
+    container_name: go-app
+    image: matheusnogueira13/go-app:latest
+    build: .
+    environment:
+      DATABASE_URL: "host=go_db user=postgres password=postgres dbname=postgres sslmode=disable"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - go_db
+  
+  #the database 
+  go_db:
+    container_name: go_db
+    image: postgres:12
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:  
+  pgdata: {}
+
+## we just defined 2 services, go-app and go_db:
+
+  ## go-app is the Go application we just Dockerized writing the Dockerfile
+
+  ## go_db is a Postgres container, to store the data. We will use the official Postgres image
+
+## version is the version of the docker-compose file. We are using the version 3.9
+
+## services is the list of services (containers) we want to run. In this case, we have 2 services: "go-app" and "go_db"
+
+## container_name is the name of the container. It's not mandatory, but it's a good practice to have a name for the container. Containers find each other by their name, so it's important to have a name for the containers we want to communicate with.
+
+## image is the name of the image we want to use. I recommend replacing "dockerhub-" with YOUR Dockerhub account (it's free).
+
+## build is the path to the Dockerfile. In this case, it's the current directory, so we are using .
+
+## ports is the list of ports we want to expose. In this case, we are exposing the port 8000 of the go-app container, and the port 5432 of the go_db container. The format is "host_port:container_port"
+
+## depends_on is the list of services we want to start before this one. In this case, we want to start the Postgres container before the app container.
+
+## environment is to define the environment variables. for the go-app, we will have a database url to configure the configuration. For the go_db container, we will have the environment variables we have to define when we wan to use the Postgres container (we can't change the keys here, because we are using the Postgres image, defined by the Postgres team).
+
+## volumes in the go_db defines a named volume we will use for persistency. Containers are ephimerals by definition, so we need this additional feature to make our data persist when the container will be removed (a container is just a process).
+
+## volumes at the end of the file is the list of volumes we want to create. In this case, we are creating a volume called pgdata. The format is volume_name: {}
